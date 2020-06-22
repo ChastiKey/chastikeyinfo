@@ -1,0 +1,7 @@
+1.1.0
+- Added: Auto Updater to re-fetch the Users & Locks cache every 1hr.
+- Fixed: Description text in plugin panel.
+- Cleaning up plugin settings.
+
+1.0.0
+- Initial
