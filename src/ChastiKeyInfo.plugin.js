@@ -38,24 +38,35 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '1.1.0',
+    version: '2.0.0',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
-    github: 'https://github.com/rileyio/chastikeyinfo'
+    github: 'https://github.com/rileyio/chastikeyinfo',
+    github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
       title: 'New',
-      items: [`Auto Updater to re-fetch the Users & Locks cache every 1hr.`]
+      items: [
+        `Settings available to customize which of the tags from v1 are displayed`,
+        `Modifications settings to tweak tag appearances`,
+        `Lockee Rating Tag`,
+        `Average Lockee Rating Tag`
+      ]
     },
     {
       title: 'Fixed',
       type: 'fixed',
-      items: ['Description text in plugin panel.']
+      items: ['Issue with new users who have no completed locks but are in one and their cumulative time locked tag was not showing']
     },
     {
       title: 'Improvements',
       type: 'improved',
-      items: ['Cleaning up plugin settings.']
+      items: [
+        'Settings Menu options',
+        'Tag building functions are now cleaner',
+        'Updated Running Locks to latest data output',
+        'Reduced amount of data that should be stored in memory, especially for running locks'
+      ]
     }
     // {
     //   title: "On-going",
@@ -72,7 +83,7 @@ const config = {
       id: 'api',
       name: 'API Configuration',
       collapsible: true,
-      shown: true,
+      shown: false,
       settings: [
         {
           type: 'textbox',
@@ -91,6 +102,100 @@ const config = {
           placeholder: 'Place the ChastiKey Application Client Secret here'
         }
       ]
+    },
+    {
+      type: 'category',
+      id: 'tags',
+      name: 'Tags Displayed',
+      collapsible: true,
+      shown: false,
+      settings: [
+        {
+          type: 'switch',
+          id: 'verifiedTag',
+          name: 'CK Verified',
+          note: `This needs to be enabled to see any CK Verified tag - Additional Modifications can be found in that category.`,
+          value: true
+        },
+        {
+          type: 'switch',
+          id: 'lockedTime',
+          name: 'Locked Time',
+          note: `This needs to be enabled to see any Locked Months tag - Additional Modifications can be found in that category.`,
+          value: true
+        },
+        {
+          type: 'switch',
+          id: 'keyholders',
+          name: 'Show Keyholder(s)',
+          note: 'This needs to be enabled to see any Keyholder tags of Lockees - Additional Modifications can be found in that category.',
+          value: true
+        },
+        {
+          type: 'switch',
+          id: 'lockeeRating',
+          name: 'Lockee Average Rating',
+          note: `This needs to be enabled to see a Lockee's average rating - Additional Modifications can be found in that category.`,
+          value: false
+        },
+        {
+          type: 'switch',
+          id: 'lockeeTrust',
+          name: 'Lockee Trust of Keyholder by active lock percentage',
+          note: 'This needs to be enabled to see the percentage of Lockee trust on active locks - Additional Modifications can be found in that category.',
+          value: false
+        }
+      ]
+    },
+    {
+      type: 'category',
+      id: 'mods',
+      name: 'Additional Modifications',
+      collapsible: true,
+      shown: false,
+      settings: [
+        {
+          type: 'radio',
+          id: 'verifiedTagMods',
+          name: 'CK Verified Tag Modifications',
+          value: 'full',
+          options: [
+            { name: 'Full text: ✓ CK Verified', value: 'full' },
+            { name: 'Checkmark only (Square): ✓', value: 'checkmark' },
+            { name: 'Checkmark only (Circle): ✓', value: 'checkmarkCircle' }
+          ]
+        },
+        {
+          type: 'radio',
+          id: 'lockedTimeMods',
+          name: 'Locked Time Tag Modifications',
+          value: 'full',
+          options: [
+            { name: 'Full text including lock emoji and number of decimal months', value: 'full' },
+            { name: 'Decimal Months Only', value: 'decimal' }
+          ]
+        },
+        {
+          type: 'radio',
+          id: 'keyholdersMods',
+          name: `Lockee's Keyholder(s) Modifications`,
+          value: 'multiple',
+          options: [
+            { name: 'Show Multiple Keyholders as separate tags (Max 3)', value: 'multiple' },
+            { name: 'Single Keyholder (Plugin picks the first locked lock for the Keyholder name)', value: 'single' }
+          ]
+        },
+        {
+          type: 'radio',
+          id: 'lockeeTrustMods',
+          name: `Lockee's Keyholder Trust of their locked locks`,
+          value: 'fullActive',
+          options: [
+            { name: 'Show Trust text followed by percentage (Active Locks)', value: 'fullActive' },
+            { name: 'Show just percentage (Active Locks)', value: 'minimalActive' }
+          ]
+        }
+      ]
     }
   ]
 }
@@ -105,12 +210,17 @@ const css = `
   padding: 0 4px;
   line-height: 1.5em;
   height: 18px;
-  margin: 0 2px 0 0;
+  margin: 0 4px 0 0;
 }
 
 .cktag.verified {
   background-color: #27ae60;
   color: #fff;
+}
+.cktag.verifiedCircle {
+  background-color: #27ae60;
+  color: #fff;
+  border-radius: 50%;
 }
 
 .cktag.keyholder {
@@ -120,6 +230,11 @@ const css = `
 
 .cktag.totalTimeLocked {
   background-color: #239cb7;
+  color: #fff;
+}
+
+.cktag.generic {
+  background-color: #444;
   color: #fff;
 }
 
@@ -261,48 +376,57 @@ const buildPlugin = ([Plugin, Api]) => {
 
       reduceLock(lock) {
         return {
-          username: lock.username,
+          // autoResetFrequencyInSeconds: lock.autoResetFrequencyInSeconds,
+          // autoResetsPaused: lock.autoResetsPaused,
+          // botChosen: lock.botChosen,
+          // build: lock.build,
+          // cardInfoHidden: lock.cardInfoHidden,
+          // cumulative: lock.cumulative,
+          // discardPile: lock.discardPile,
           discordID: lock.discordID,
+          // doubleUpCards: lock.doubleUpCards,
+          // fixed: lock.fixed,
+          // freezeCards: lock.freezeCards,
+          // greenCards: lock.greenCards,
+          // greenCardsPicked: lock.greenCardsPicked,
+          lockFrozen: lock.lockFrozen,
+          // lockFrozenByCard: lock.lockFrozenByCard,
+          // lockFrozenByKeyholder: lock.lockFrozenByKeyholder,
           lockGroupID: lock.lockGroupID,
           lockID: lock.lockID,
-          lockedBy: lock.lockedBy,
           lockName: lock.lockName,
-          sharedLockID: lock.sharedLockID,
-          sharedLockQRCode: lock.sharedLockQRCode,
-          sharedLockURL: lock.sharedLockURL,
-          cardInfoHidden: lock.cardInfoHidden,
-          cumulative: lock.cumulative,
-          doubleUpCards: lock.doubleUpCards,
-          fixed: lock.fixed,
-          freezeCards: lock.freezeCards,
-          greenCards: lock.greenCards,
-          greenCardsPicked: lock.greenCardsPicked,
-          lockFrozen: lock.lockFrozen,
-          lockFrozenByCard: lock.lockFrozenByCard,
-          lockFrozenByKeyholder: lock.lockFrozenByKeyholder,
-          logID: lock.logID,
-          multipleGreensRequired: lock.multipleGreensRequired,
-          noOfTimesCardReset: lock.noOfTimesCardReset,
-          noOfTimesFullReset: lock.noOfTimesFullReset,
-          noOfTurns: lock.noOfTurns,
-          redCards: lock.redCards,
-          regularity: lock.regularity,
-          resetCards: lock.resetCards,
+          lockedBy: lock.lockedBy,
+          // logID: lock.logID,
+          // maximumAutoResets: lock.maximumAutoResets,
+          // multipleGreensRequired: lock.multipleGreensRequired,
+          // noOfTimesAutoReset: lock.noOfTimesAutoReset,
+          // noOfTimesCardReset: lock.noOfTimesCardReset,
+          // noOfTimesFullReset: lock.noOfTimesFullReset,
+          // noOfTurns: lock.noOfTurns,
+          // redCards: lock.redCards,
+          // regularity: lock.regularity,
+          // resetCards: lock.resetCards,
+          // sharedLockID: lock.sharedLockID,
+          // sharedLockQRCode: lock.sharedLockQRCode,
+          // sharedLockURL: lock.sharedLockURL,
           status: lock.status,
-          stickyCards: lock.stickyCards,
-          timerHidden: lock.timerHidden,
-          timestampExpectedUnlock: lock.timestampExpectedUnlock,
-          timestampFrozenByCard: lock.timestampFrozenByCard,
-          timestampFrozenByKeyholder: lock.timestampFrozenByKeyholder,
-          timestampLastCardReset: lock.timestampLastCardReset,
-          timestampLastFullReset: lock.timestampLastFullReset,
-          timestampLastPicked: lock.timestampLastPicked,
-          timestampLocked: lock.timestampLocked,
-          timestampNextPick: lock.timestampNextPick,
-          timestampRealLastPicked: lock.timestampRealLastPicked,
-          totalTimeFrozen: lock.totalTimeFrozen,
+          // stickyCards: lock.stickyCards,
+          // timerHidden: lock.timerHidden,
+          // timestampExpectedUnlock: lock.timestampExpectedUnlock,
+          // timestampFrozenByCard: lock.timestampFrozenByCard,
+          // timestampFrozenByKeyholder: lock.timestampFrozenByKeyholder,
+          // timestampLastAutoReset: lock.timestampLastAutoReset,
+          // timestampLastCardReset: lock.timestampLastCardReset,
+          // timestampLastFullReset: lock.timestampLastFullReset,
+          // timestampLastPicked: lock.timestampLastPicked,
+          // timestampLocked: lock.timestampLocked,
+          // timestampNextPick: lock.timestampNextPick,
+          // timestampRealLastPicked: lock.timestampRealLastPicked,
+          // totalTimeFrozen: lock.totalTimeFrozen,
           trustKeyholder: lock.trustKeyholder,
-          yellowCards: lock.yellowCards
+          // userID: lock.userID,
+          username: lock.username
+          // yellowCards: lock.yellowCards,
         }
       }
 
@@ -344,7 +468,7 @@ const buildPlugin = ([Plugin, Api]) => {
             if (res.successful) {
               // Store last fetch time to not poll too frequently
               Library.PluginUtilities.saveData(this.getName(), 'runningLocksCacheTimestamp', Date.now())
-              runningLocksCache = res.data.locks.filter((u) => u.discordID !== '')
+              runningLocksCache = res.data.locks.filter((u) => u.discordID !== '').map((l) => this.reduceLock(l))
               BdApi.showToast(`ChastiKey Running Locks Cache Reloaded! (${runningLocksCache.length})`, { type: 'success' })
             } else {
               BdApi.showToast('ChastiKey Running Locks Cache Not Reloaded!', { type: 'error' })
@@ -400,18 +524,7 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       getSettingsPanel() {
-        const panel = this.buildSettingsPanel()
-        // panel.append(
-        //   this.buildSetting({
-        //     type: "switch",
-        //     id: "otherOverride",
-        //     name: "A second override?!",
-        //     note: "wtf is happening here",
-        //     value: true,
-        //     onChange: (value) => (this.settings["otherOverride"] = value),
-        //   })
-        // );
-        return panel.getElement()
+        return this.buildSettingsPanel().getElement()
       }
 
       observer({ addedNodes }) {
@@ -459,55 +572,77 @@ const buildPlugin = ([Plugin, Api]) => {
         const username = node.querySelector(`.${MessageClasses.username.split(' ')[0]}`)
 
         // When verified
-        const verifiedTag = this.createTag('✓ CK Verified', 'verified')
-        verifiedTag.classList.add('before')
-        toAppend.push(verifiedTag)
-
+        if (this.settings.tags.verifiedTag) toAppend.push(this.verifiedTag())
         // Cumulative Time Locked
-        if (user.totalNoOfCompletedLocks !== 0 && (user.mainRole !== 'Lockee' || user.mainRole !== '')) {
-          const totalTimeLocked = this.createTag(`🔒 ${user._totalTimeLocked} mo.`, 'totalTimeLocked')
-          totalTimeLocked.classList.add('before')
-          toAppend.push(totalTimeLocked)
-        }
+        if (this.settings.tags.lockedTime) toAppend.push(this.lockedTime(user))
+        // User Ratings
+        if (this.settings.tags.lockeeRating && user.noOfLockeeRatings >= 5) toAppend.push(this.averageLockeeRating(user))
+        // When there's an active lock
+        if (this.settings.tags.lockeeTrust && hasRunningLock) toAppend.push(this.runningLocksKHTrust(runningLocks))
+        if (this.settings.tags.keyholders && hasRunningLock) this.keyholders(runningLocks).forEach((tag) => toAppend.push(tag))
 
-        // When there's an active lock, show Keyholder(s)
-        if (hasRunningLock) {
-          // Get an array of just keyholder names
-          const keyholders = this.removeDupsFromArray(runningLocks.map((lock) => (lock.lockedBy === '' ? 'Self Locked' : lock.lockedBy)))
-          keyholders.reverse()
-
-          // When there's only <=3 KH
-          // if (keyholders.length <= 3) {
-          const maxKHs = keyholders.length <= 3 ? keyholders.length : 3
-          for (let index = 0; index < maxKHs; index++) {
-            const kh = keyholders[index]
-            // Find the keyholder
-            const keyholderFromUsersCache = usersCache.find((u) => u.username === kh)
-            const keyholderTag = this.createTag(kh, 'keyholder')
-
-            // Add KH Level, if one
-            if (keyholderFromUsersCache) {
-              keyholderTag.classList.add(`keyholder-level-${keyholderFromUsersCache.keyholderLevel}`)
-            }
-
-            keyholderTag.classList.add('before')
-            toAppend.push(keyholderTag)
-          }
-        }
-        // When there's >3 KH
-        // else {
-        // const keyholderTag = this.createTag(`Multiple Keyholders`, 'keyholder')
-        // keyholderTag.classList.add('before')
-        // toAppend.push(keyholderTag)
-        // }
-        // }
-
-        // Append all tags
-        // Logger.log(`Appending [${toAppend.length}] to username`)
+        // Append all tags - If there are any
         toAppend.reverse()
-        toAppend.forEach((tag) => {
-          username.insertAdjacentElement('afterend', tag)
-        })
+        toAppend.forEach((tag) => username.insertAdjacentElement('afterend', tag))
+      }
+
+      // * Tags * //
+      verifiedTag() {
+        const isCircle = this.settings.mods.verifiedTagMods === 'checkmarkCircle'
+        const tag = this.createTag(this.settings.mods.verifiedTagMods !== 'full' ? '✓' : '✓ CK Verified', isCircle ? 'verifiedCircle' : 'verified')
+        tag.classList.add('before')
+        return tag
+      }
+
+      lockedTime(user) {
+        // When there's no data, just return a tag with 0 in it
+        const tag = this.createTag(this.settings.mods.lockedTimeMods === 'decimal' ? `${user._totalTimeLocked} mo.` : `🔒 ${user._totalTimeLocked} mo.`, 'totalTimeLocked')
+        tag.classList.add('before')
+        return tag
+      }
+
+      keyholders(runningLocks) {
+        // Get an array of just keyholder names
+        const keyholders = this.removeDupsFromArray(runningLocks.map((lock) => (lock.lockedBy === '' ? 'Self Locked' : lock.lockedBy)))
+        keyholders.reverse()
+        const tags = []
+
+        const maxKHs = this.settings.mods.keyholdersMods !== 'multiple' ? 1 : keyholders.length <= 3 ? keyholders.length : 3
+        for (let index = 0; index < maxKHs; index++) {
+          const kh = keyholders[index]
+          // Find the keyholder
+          const keyholderFromUsersCache = usersCache.find((u) => u.username === kh)
+          const tag = this.createTag(kh, 'keyholder')
+
+          // Add KH Level, if one
+          if (keyholderFromUsersCache) {
+            tag.classList.add(`keyholder-level-${keyholderFromUsersCache.keyholderLevel}`)
+          }
+
+          tag.classList.add('before')
+          tags.push(tag)
+        }
+
+        return tags
+      }
+
+      averageLockeeRating(user) {
+        const rating = (Math.round(user.averageLockeeRating * 100) / 100).toFixed(2)
+        const inFull = rating === 5.0 || rating === 4.0 || rating === 3.0 || rating === 2.0 || rating === 1.0
+        const tag = this.createTag(`${inFull ? Math.round(rating) : rating}`, 'generic')
+        tag.classList.add('before')
+        return tag
+      }
+
+      runningLocksKHTrust(runningLocks) {
+        const runningLocksTrust = runningLocks.map((l) => l.trustKeyholder)
+        const runningLocksTrustPerc = Math.round((runningLocksTrust.filter((l) => l === 1).length / runningLocksTrust.length) * 100).toFixed(1)
+        const tag = this.createTag(
+          `${this.settings.mods.lockeeTrustMods === 'fullActive' ? 'Trust: ' : ''}${runningLocksTrustPerc < 100 ? runningLocksTrustPerc : 100}%`,
+          'generic'
+        )
+        tag.classList.add('before')
+        return tag
       }
     }
   }
