@@ -65,7 +65,8 @@ const config = {
         'Settings Menu options',
         'Tag building functions are now cleaner',
         'Updated Running Locks to latest data output',
-        'Reduced amount of data that should be stored in memory, especially for running locks'
+        'Reduced amount of data that should be stored in memory, especially for running locks',
+        'Updating margin spacing between tags from 2px to 4px, hopefully its not just me on 4k that find them too close together'
       ]
     }
     // {
