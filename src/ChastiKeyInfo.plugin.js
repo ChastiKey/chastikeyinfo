@@ -550,7 +550,7 @@ const buildPlugin = ([Plugin, Api]) => {
         const instance = ReactTools.getReactInstance(node)
         if (!instance) return
 
-        const props = this.getProps(instance, 'memoizedProps.children.0.props.children.1.props')
+        const props = this.getProps(instance, 'memoizedProps.children.1.props.children.1.props')
 
         if (!props || !this.getProps(props, 'message')) return
 
