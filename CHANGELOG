@@ -1,3 +1,18 @@
+2.0.1
+- Issue resolved after recent Discord update where changes were made to in chat elements.
+
+2.0.0
+- New: New Settings available to customize which of the tags from v1 are displayed  
+- New: Modifications settings to tweak tag appearances  
+- New: Lockee Rating Tag  
+- New: Average Lockee Rating  
+- Fixed: Issue with new users who have no completed locks but are in one and their cumulative time locked tag was not showing  
+- Updated: Settings Menu options  
+- Updated: Tag building functions are now cleaner  
+- Updated: Running Locks to latest data output  
+- Updated: Reduced amount of data that should be stored in memory, especially for running locks  
+- Updated: Margin spacing between tags from 2px to 4px, hopefully its not just me on 4k that find them too close together  
+
 1.1.0
 - Added: Auto Updater to re-fetch the Users & Locks cache every 1hr.
 - Fixed: Description text in plugin panel.
