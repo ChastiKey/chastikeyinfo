@@ -38,37 +38,17 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.0.0',
+    version: '2.0.1',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
-      title: 'New',
-      items: [
-        `Settings available to customize which of the tags from v1 are displayed`,
-        `Modifications settings to tweak tag appearances`,
-        `Lockee Rating Tag`,
-        `Average Lockee Rating Tag`
-      ]
-    },
-    {
       title: 'Fixed',
       type: 'fixed',
-      items: ['Issue with new users who have no completed locks but are in one and their cumulative time locked tag was not showing']
+      items: ['Issue resolved after recent Discord update where changes were made to in chat elements.']
     },
-    {
-      title: 'Improvements',
-      type: 'improved',
-      items: [
-        'Settings Menu options',
-        'Tag building functions are now cleaner',
-        'Updated Running Locks to latest data output',
-        'Reduced amount of data that should be stored in memory, especially for running locks',
-        'Updating margin spacing between tags from 2px to 4px, hopefully its not just me on 4k that find them too close together'
-      ]
-    }
     // {
     //   title: "On-going",
     //   type: "progress",
@@ -550,7 +530,7 @@ const buildPlugin = ([Plugin, Api]) => {
         const instance = ReactTools.getReactInstance(node)
         if (!instance) return
 
-        const props = this.getProps(instance, 'memoizedProps.children.0.props.children.1.props')
+        const props = this.getProps(instance, 'memoizedProps.children.1.props.children.1.props')
 
         if (!props || !this.getProps(props, 'message')) return
 
