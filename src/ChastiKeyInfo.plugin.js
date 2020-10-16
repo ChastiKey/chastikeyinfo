@@ -38,7 +38,7 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.0.1',
+    version: '2.0.2',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
@@ -47,7 +47,7 @@ const config = {
     {
       title: 'Fixed',
       type: 'fixed',
-      items: ['Issue resolved after recent Discord update where changes were made to in chat elements.']
+      items: ['Style positioning for tags, now properly inline with text.']
     },
     // {
     //   title: "On-going",
@@ -184,24 +184,25 @@ const config = {
 const css = `
 .cktag {
   position: relative;
-  top: 2px;
   font-size: 12px;
   border-radius: 4px;
   font-weight: 500;
   padding: 0 4px;
   line-height: 1.5em;
   height: 18px;
-  margin: 0 4px 0 0;
+  margin: 0 4px 0 0px;
 }
 
 .cktag.verified {
   background-color: #27ae60;
   color: #fff;
+  margin-left: 4px;
 }
 .cktag.verifiedCircle {
   background-color: #27ae60;
   color: #fff;
   border-radius: 50%;
+  margin-left: 4px;
 }
 
 .cktag.keyholder {
