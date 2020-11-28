@@ -38,16 +38,24 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.0.3',
+    version: '2.1.0',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
-      title: 'Sorta Fixed',
+      title: 'Added',
+      type: 'added',
+      items: [
+        'Auto Updater',
+        'On first load the channel in focus will also receive tags without needing to switch away.'
+      ]
+    },
+    {
+      title: 'Fixed',
       type: 'fixed',
-      items: ['A Kinda, sorta, maybe, but not always fix... because.. reasons. Will keep looking into other ideas to fully repair.']
+      items: ['Making settings menu work again!', 'Settings Menu']
     },
     // {
     //   title: "On-going",
@@ -92,39 +100,59 @@ const config = {
       shown: false,
       settings: [
         {
-          type: 'switch',
+          type: 'dropdown',
           id: 'verifiedTag',
           name: 'CK Verified',
           note: `This needs to be enabled to see any CK Verified tag - Additional Modifications can be found in that category.`,
-          value: true
+          value: true,
+          options: [
+            { label: "Yes", value: true },
+            { label: "No", value: false }
+          ]
         },
         {
-          type: 'switch',
+          type: 'dropdown',
           id: 'lockedTime',
           name: 'Locked Time',
           note: `This needs to be enabled to see any Locked Months tag - Additional Modifications can be found in that category.`,
-          value: true
+          value: true,
+          options: [
+            { label: "Yes", value: true },
+            { label: "No", value: false }
+          ]
         },
         {
-          type: 'switch',
+          type: 'dropdown',
           id: 'keyholders',
           name: 'Show Keyholder(s)',
           note: 'This needs to be enabled to see any Keyholder tags of Lockees - Additional Modifications can be found in that category.',
-          value: true
+          value: true,
+          options: [
+            { label: "Yes", value: true },
+            { label: "No", value: false }
+          ]
         },
         {
-          type: 'switch',
+          type: 'dropdown',
           id: 'lockeeRating',
           name: 'Lockee Average Rating',
           note: `This needs to be enabled to see a Lockee's average rating - Additional Modifications can be found in that category.`,
-          value: false
+          value: false,
+          options: [
+            { label: "Yes", value: true },
+            { label: "No", value: false }
+          ]
         },
         {
-          type: 'switch',
+          type: 'dropdown',
           id: 'lockeeTrust',
           name: 'Lockee Trust of Keyholder by active lock percentage',
           note: 'This needs to be enabled to see the percentage of Lockee trust on active locks - Additional Modifications can be found in that category.',
-          value: false
+          value: false,
+          options: [
+            { label: "Yes", value: true },
+            { label: "No", value: false }
+          ]
         }
       ]
     },
@@ -136,44 +164,54 @@ const config = {
       shown: false,
       settings: [
         {
-          type: 'radio',
+          type: 'dropdown',
           id: 'verifiedTagMods',
           name: 'CK Verified Tag Modifications',
           value: 'full',
           options: [
-            { name: 'Full text: ✓ CK Verified', value: 'full' },
-            { name: 'Checkmark only (Square): ✓', value: 'checkmark' },
-            { name: 'Checkmark only (Circle): ✓', value: 'checkmarkCircle' }
+            { label: 'Full text: ✓ CK Verified', value: 'full' },
+            { label: 'Checkmark only (Square): ✓', value: 'checkmark' },
+            { label: 'Checkmark only (Circle): ✓', value: 'checkmarkCircle' }
           ]
         },
         {
-          type: 'radio',
+          type: 'dropdown',
           id: 'lockedTimeMods',
           name: 'Locked Time Tag Modifications',
           value: 'full',
           options: [
-            { name: 'Full text including lock emoji and number of decimal months', value: 'full' },
-            { name: 'Decimal Months Only', value: 'decimal' }
+            { label: 'Full text including lock emoji and number of decimal months', value: 'full' },
+            { label: 'Decimal Months Only', value: 'decimal' }
           ]
         },
         {
-          type: 'radio',
+          type: 'dropdown',
           id: 'keyholdersMods',
           name: `Lockee's Keyholder(s) Modifications`,
           value: 'multiple',
           options: [
-            { name: 'Show Multiple Keyholders as separate tags (Max 3)', value: 'multiple' },
-            { name: 'Single Keyholder (Plugin picks the first locked lock for the Keyholder name)', value: 'single' }
+            { label: 'Show Multiple Keyholders as separate tags (Max 3)', value: 'multiple' },
+            { label: 'Single Keyholder (Plugin picks the first locked lock for the Keyholder name)', value: 'single' }
           ]
         },
         {
-          type: 'radio',
+          type: 'dropdown',
           id: 'lockeeTrustMods',
           name: `Lockee's Keyholder Trust of their locked locks`,
           value: 'fullActive',
           options: [
-            { name: 'Show Trust text followed by percentage (Active Locks)', value: 'fullActive' },
-            { name: 'Show just percentage (Active Locks)', value: 'minimalActive' }
+            { label: 'Show Trust text followed by percentage (Active Locks)', value: 'fullActive' },
+            { label: 'Show just percentage (Active Locks)', value: 'minimalActive' }
+          ]
+        },
+        {
+          type: 'dropdown',
+          id: 'placeholder',
+          name: `Placeholder (does nothing)`,
+          value: '1',
+          options: [
+            { label: '1', value: '1' },
+            { label: '2', value: '2' }
           ]
         }
       ]
@@ -228,14 +266,14 @@ const css = `
 `
 
 const buildPlugin = ([Plugin, Api]) => {
-  const { ReactTools, DOMTools, WebpackModules, Logger, PluginUtilities } = Api
+  const { DOMTools, Logger, PluginUpdater, PluginUtilities, ReactTools, Utilities, WebpackModules } = Api
   const req = require('request')
   const MessageClasses = {
     ...WebpackModules.getByProps('message', 'groupStart'),
     ...WebpackModules.getByProps('compact', 'cozy', 'username')
   }
 
-  const plugin = (Plugin, Library) => {
+  const plugin = () => {
     var usersCache = []
     var runningLocksCache = []
     var cacheUpdater
@@ -249,8 +287,15 @@ const buildPlugin = ([Plugin, Api]) => {
       // * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       // * Lifecycle Hooks
       // * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      onStart() {
+      async onStart() {
         Logger.log('Started')
+        // Force Update Check
+        Logger.log('Checking for ChastiKeyInfo BD update! Current:', this.getVersion())
+        PluginUpdater.checkForUpdate(
+          this.getName(),
+          this.getVersion(),
+          'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js');
+
         this.settings = this.loadSettings(this.default)
         this.reinjectCSS()
         Logger.log(this.settings)
@@ -261,13 +306,16 @@ const buildPlugin = ([Plugin, Api]) => {
         }
 
         // Reload: Users Cache
-        this.fetchRemoteUsersCache()
+        await this.fetchRemoteUsersCache()
 
         // Reload: Running Locks Cache
-        this.fetchRemoteLocksCache()
+        await this.fetchRemoteLocksCache()
 
         // Start Cache Updater
         this.startCacheUpdater()
+
+        // Force Update now
+        for (const node of document.querySelectorAll(`.${MessageClasses.groupStart.split(' ')[0]}`)) this.processNode(node)
       }
 
       onStop() {
@@ -289,14 +337,6 @@ const buildPlugin = ([Plugin, Api]) => {
       // ? ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       // ? Helper Methods
       // ? ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      /**
-       * @name safelyGetNestedProps
-       * @author Zerebos
-       */
-      getProps(obj, path) {
-        return path.split(/\s?\.\s?/).reduce((obj, prop) => obj && obj[prop], obj)
-      }
-
       removeDupsFromArray(array) {
         return [...new Set(array)]
       }
@@ -413,54 +453,50 @@ const buildPlugin = ([Plugin, Api]) => {
         }
       }
 
-      fetchRemoteUsersCache(skipElse) {
-        ; (async () => {
-          if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'usersCacheTimestamp') || usersCache.length <= 1) {
-            BdApi.showToast('Reloading ChastiKey Users Cache', { type: 'info' })
+      async fetchRemoteUsersCache(skipElse) {
+        if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'usersCacheTimestamp') || usersCache.length <= 1) {
+          BdApi.showToast('Reloading ChastiKey Users Cache', { type: 'info' })
 
-            // Make Request
-            const res = await this.request('post', 'https://api.chastikey.com/v0.5/userdata.php')
+          // Make Request
+          const res = await this.request('post', 'https://api.chastikey.com/v0.5/userdata.php')
 
-            // Update cached variable
-            if (res.successful) {
-              // Store last fetch time to not poll too frequently
-              Library.PluginUtilities.saveData(this.getName(), 'usersCacheTimestamp', Date.now())
-              usersCache = res.data.users.filter((u) => u.discordID !== '').map((u) => this.reduceUser(u))
-              BdApi.showToast(`ChastiKey Users Cache Reloaded! (${usersCache.length})`, { type: 'success' })
-            } else {
-              BdApi.showToast('ChastiKey Users Cache Not Reloaded!', { type: 'error' })
-            }
+          // Update cached variable
+          if (res.successful) {
+            // Store last fetch time to not poll too frequently
+            PluginUtilities.saveData(this.getName(), 'usersCacheTimestamp', Date.now())
+            usersCache = res.data.users.filter((u) => u.discordID !== '').map((u) => this.reduceUser(u))
+            BdApi.showToast(`ChastiKey Users Cache Reloaded! (${usersCache.length})`, { type: 'success' })
+          } else {
+            BdApi.showToast('ChastiKey Users Cache Not Reloaded!', { type: 'error' })
           }
+        }
 
-          // Else: There's no reason to reload the cache
-          else {
-            if (!skipElse) BdApi.showToast(`ChastiKey Users Cache Already loaded! Size = ${usersCache.length}`, { type: 'info' })
-          }
-        })()
+        // Else: There's no reason to reload the cache
+        else {
+          if (!skipElse) BdApi.showToast(`ChastiKey Users Cache Already loaded! Size = ${usersCache.length}`, { type: 'info' })
+        }
       }
 
-      fetchRemoteLocksCache(skipElse) {
-        ; (async () => {
-          if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'runningLocksCacheTimestamp') || usersCache.length <= 1) {
-            BdApi.showToast('Reloading ChastiKey Running Locks Cache', { type: 'info' })
+      async fetchRemoteLocksCache(skipElse) {
+        if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'runningLocksCacheTimestamp') || usersCache.length <= 1) {
+          BdApi.showToast('Reloading ChastiKey Running Locks Cache', { type: 'info' })
 
-            // Make Request
-            const res = await this.request('post', 'https://api.chastikey.com/v0.5/runninglocks.php')
+          // Make Request
+          const res = await this.request('post', 'https://api.chastikey.com/v0.5/runninglocks.php')
 
-            // Update cached variable
-            if (res.successful) {
-              // Store last fetch time to not poll too frequently
-              Library.PluginUtilities.saveData(this.getName(), 'runningLocksCacheTimestamp', Date.now())
-              runningLocksCache = res.data.locks.filter((u) => u.discordID !== '').map((l) => this.reduceLock(l))
-              BdApi.showToast(`ChastiKey Running Locks Cache Reloaded! (${runningLocksCache.length})`, { type: 'success' })
-            } else {
-              BdApi.showToast('ChastiKey Running Locks Cache Not Reloaded!', { type: 'error' })
-            }
+          // Update cached variable
+          if (res.successful) {
+            // Store last fetch time to not poll too frequently
+            PluginUtilities.saveData(this.getName(), 'runningLocksCacheTimestamp', Date.now())
+            runningLocksCache = res.data.locks.filter((u) => u.discordID !== '').map((l) => this.reduceLock(l))
+            BdApi.showToast(`ChastiKey Running Locks Cache Reloaded! (${runningLocksCache.length})`, { type: 'success' })
           } else {
-            // Suppress if skip is passed
-            if (!skipElse) BdApi.showToast(`ChastiKey Running Locks Cache Already loaded! Size = ${runningLocksCache.length}`, { type: 'info' })
+            BdApi.showToast('ChastiKey Running Locks Cache Not Reloaded!', { type: 'error' })
           }
-        })()
+        } else {
+          // Suppress if skip is passed
+          if (!skipElse) BdApi.showToast(`ChastiKey Running Locks Cache Already loaded! Size = ${runningLocksCache.length}`, { type: 'info' })
+        }
       }
 
       // ? ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -511,10 +547,7 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       observer({ addedNodes }) {
-        // Logger.log('observer')
-        // Patcher.after(MessageHeader, 'default', (that, [props], value) => {})
-
-        for (const node of addedNodes.values()) {
+        for (const node of addedNodes) {
           if (!node) continue
           if (node.classList && node.classList.contains(MessageClasses.groupStart.split(' ')[0])) {
             this.processNode(node)
@@ -522,21 +555,21 @@ const buildPlugin = ([Plugin, Api]) => {
         }
       }
 
+      processMessageUsername(e) {
+        Logger.load('processMessageUsername', e)
+      }
+
       processNode(node) {
+        // Logger.log('node', node)
         // Skip if already rendered on this node
         if (node.querySelectorAll('.cktag').length) {
           Logger.log('Skip as something is already here!')
           return
         }
 
-        // Get Author ID from image URL
-        const avatarURLEl = node.querySelector('.da-avatar img')
-        const avatarURLRegex = /\/avatars\/([0-9]*)\//
-        const avatarURLMatch = avatarURLRegex.exec(avatarURLEl.src)
-
-        // If no image to piggyback off, Skip
-        if (!avatarURLMatch) return;
-        const author = { id: avatarURLMatch[1] }
+        const instance = ReactTools.getReactInstance(node);
+        if (!instance) return
+        const { message: { author } } = Utilities.getNestedProp(instance, 'memoizedProps.children.1.props.children.1.props')
 
         // Prepare items to append
         var toAppend = []

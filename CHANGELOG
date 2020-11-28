@@ -1,8 +1,15 @@
+2.1.0
+- Added: Auto Updater
+- Added: On first load the channel in focus will also receive tags without needing to switch away.
+
+- Fixed: Tags not rendering issue from 2.0.x (#3)
+- Fixed: Settings Menu
+
 2.0.3
-- Sorta Fixed: No tags anywhere issue after recent client update.
+- Fixed: Sorta Fixed: No tags anywhere issue after recent client update.
 
 2.0.1
-- Issue resolved after recent Discord update where changes were made to in chat elements.
+- Fixed: Issue resolved after recent Discord update where changes were made to in chat elements.
 
 2.0.0
 - New: New Settings available to customize which of the tags from v1 are displayed  
