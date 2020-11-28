@@ -6,24 +6,24 @@
 /*@cc_on
 @if (@_jscript)
 	
-	// Offer to self-install for clueless users that try to run this directly.
-	var shell = WScript.CreateObject("WScript.Shell");
-	var fs = new ActiveXObject("Scripting.FileSystemObject");
-	var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%\BetterDiscord\plugins");
-	var pathSelf = WScript.ScriptFullName;
-	// Put the user at ease by addressing them in the first person
-	shell.Popup("It looks like you've mistakenly tried to run me directly. \n(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
-	if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
-		shell.Popup("I'm in the correct folder already.", 0, "I'm already installed", 0x40);
-	} else if (!fs.FolderExists(pathPlugins)) {
-		shell.Popup("I can't find the BetterDiscord plugins folder.\nAre you sure it's even installed?", 0, "Can't install myself", 0x10);
-	} else if (shell.Popup("Should I copy myself to BetterDiscord's plugins folder for you?", 0, "Do you need some help?", 0x34) === 6) {
-		fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
-		// Show the user where to put plugins in the future
-		shell.Exec("explorer " + pathPlugins);
-		shell.Popup("I'm installed!", 0, "Successfully installed", 0x40);
-	}
-	WScript.Quit();
+  // Offer to self-install for clueless users that try to run this directly.
+  var shell = WScript.CreateObject("WScript.Shell");
+  var fs = new ActiveXObject("Scripting.FileSystemObject");
+  var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%\BetterDiscord\plugins");
+  var pathSelf = WScript.ScriptFullName;
+  // Put the user at ease by addressing them in the first person
+  shell.Popup("It looks like you've mistakenly tried to run me directly. \n(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
+  if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
+    shell.Popup("I'm in the correct folder already.", 0, "I'm already installed", 0x40);
+  } else if (!fs.FolderExists(pathPlugins)) {
+    shell.Popup("I can't find the BetterDiscord plugins folder.\nAre you sure it's even installed?", 0, "Can't install myself", 0x10);
+  } else if (shell.Popup("Should I copy myself to BetterDiscord's plugins folder for you?", 0, "Do you need some help?", 0x34) === 6) {
+    fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
+    // Show the user where to put plugins in the future
+    shell.Exec("explorer " + pathPlugins);
+    shell.Popup("I'm installed!", 0, "Successfully installed", 0x40);
+  }
+  WScript.Quit();
 
 @else@*/
 
@@ -38,16 +38,16 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.0.2',
+    version: '2.0.3',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
-      title: 'Fixed',
+      title: 'Sorta Fixed',
       type: 'fixed',
-      items: ['Style positioning for tags, now properly inline with text.']
+      items: ['A Kinda, sorta, maybe, but not always fix... because.. reasons. Will keep looking into other ideas to fully repair.']
     },
     // {
     //   title: "On-going",
@@ -282,6 +282,7 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       onSwitch() {
+        Logger.log('onSwitch')
         for (const node of document.querySelectorAll(`.${MessageClasses.groupStart.split(' ')[0]}`)) this.processNode(node)
       }
 
@@ -413,7 +414,7 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       fetchRemoteUsersCache(skipElse) {
-        ;(async () => {
+        ; (async () => {
           if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'usersCacheTimestamp') || usersCache.length <= 1) {
             BdApi.showToast('Reloading ChastiKey Users Cache', { type: 'info' })
 
@@ -439,7 +440,7 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       fetchRemoteLocksCache(skipElse) {
-        ;(async () => {
+        ; (async () => {
           if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'runningLocksCacheTimestamp') || usersCache.length <= 1) {
             BdApi.showToast('Reloading ChastiKey Running Locks Cache', { type: 'info' })
 
@@ -510,6 +511,9 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       observer({ addedNodes }) {
+        // Logger.log('observer')
+        // Patcher.after(MessageHeader, 'default', (that, [props], value) => {})
+
         for (const node of addedNodes.values()) {
           if (!node) continue
           if (node.classList && node.classList.contains(MessageClasses.groupStart.split(' ')[0])) {
@@ -521,24 +525,21 @@ const buildPlugin = ([Plugin, Api]) => {
       processNode(node) {
         // Skip if already rendered on this node
         if (node.querySelectorAll('.cktag').length) {
-          // Logger.log('Skip as something is already here!')
+          Logger.log('Skip as something is already here!')
           return
         }
 
+        // Get Author ID from image URL
+        const avatarURLEl = node.querySelector('.da-avatar img')
+        const avatarURLRegex = /\/avatars\/([0-9]*)\//
+        const avatarURLMatch = avatarURLRegex.exec(avatarURLEl.src)
+
+        // If no image to piggyback off, Skip
+        if (!avatarURLMatch) return;
+        const author = { id: avatarURLMatch[1] }
+
         // Prepare items to append
         var toAppend = []
-
-        const instance = ReactTools.getReactInstance(node)
-        if (!instance) return
-
-        const props = this.getProps(instance, 'memoizedProps.children.1.props.children.1.props')
-
-        if (!props || !this.getProps(props, 'message')) return
-
-        // Get Message Author for the ID to check if they're cached
-        const {
-          message: { author }
-        } = props
 
         // Is user cached and has a discord id?
         const user = this.getUser(author.id)
@@ -551,7 +552,7 @@ const buildPlugin = ([Plugin, Api]) => {
         const hasRunningLock = runningLocks.length > 0
 
         // Get Username element to append to
-        const username = node.querySelector(`.${MessageClasses.username.split(' ')[0]}`)
+        const username = node.querySelector('.da-header > .da-headerText')
 
         // When verified
         if (this.settings.tags.verifiedTag) toAppend.push(this.verifiedTag())
@@ -634,39 +635,39 @@ const buildPlugin = ([Plugin, Api]) => {
 module.exports = (() => {
   return !global.ZeresPluginLibrary
     ? class {
-        constructor() {
-          this._config = config
-        }
-        getName() {
-          return config.info.name
-        }
-        getAuthor() {
-          return config.info.authors.map((a) => a.name).join(', ')
-        }
-        getDescription() {
-          return config.info.description
-        }
-        getVersion() {
-          return config.info.version
-        }
-        load() {
-          BdApi.showConfirmationModal('Library Missing', `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
-            confirmText: 'Download Now',
-            cancelText: 'Cancel',
-            onConfirm: () => {
-              require('request').get('https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js', async (error, response, body) => {
-                if (error)
-                  return require('electron').shell.openExternal(
-                    'https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js'
-                  )
-                await new Promise((r) => require('fs').writeFile(require('path').join(BdApi.Plugins.folder, '0PluginLibrary.plugin.js'), body, r))
-              })
-            }
-          })
-        }
-        start() {}
-        stop() {}
+      constructor() {
+        this._config = config
       }
+      getName() {
+        return config.info.name
+      }
+      getAuthor() {
+        return config.info.authors.map((a) => a.name).join(', ')
+      }
+      getDescription() {
+        return config.info.description
+      }
+      getVersion() {
+        return config.info.version
+      }
+      load() {
+        BdApi.showConfirmationModal('Library Missing', `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
+          confirmText: 'Download Now',
+          cancelText: 'Cancel',
+          onConfirm: () => {
+            require('request').get('https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js', async (error, response, body) => {
+              if (error)
+                return require('electron').shell.openExternal(
+                  'https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js'
+                )
+              await new Promise((r) => require('fs').writeFile(require('path').join(BdApi.Plugins.folder, '0PluginLibrary.plugin.js'), body, r))
+            })
+          }
+        })
+      }
+      start() { }
+      stop() { }
+    }
     : buildPlugin(global.ZeresPluginLibrary.buildPlugin(config))
 })()
 /*@end@*/
