@@ -27,7 +27,7 @@
 
 @else@*/
 
-const config = {
+const config = {  
   main: 'index.js',
   info: {
     name: 'ChastiKeyInfo',
@@ -38,24 +38,16 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.1.0',
+    version: '2.1.1',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
-      title: 'Added',
-      type: 'added',
-      items: [
-        'Auto Updater',
-        'On first load the channel in focus will also receive tags without needing to switch away.'
-      ]
-    },
-    {
       title: 'Fixed',
       type: 'fixed',
-      items: ['Making settings menu work again!', 'Settings Menu']
+      items: ['Tags not working']
     },
     // {
     //   title: "On-going",
@@ -585,7 +577,7 @@ const buildPlugin = ([Plugin, Api]) => {
         const hasRunningLock = runningLocks.length > 0
 
         // Get Username element to append to
-        const username = node.querySelector('.da-header > .da-headerText')
+        const username = node.querySelector('span[class^="header"]')
 
         // When verified
         if (this.settings.tags.verifiedTag) toAppend.push(this.verifiedTag())
