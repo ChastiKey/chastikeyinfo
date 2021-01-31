@@ -47,7 +47,7 @@ const config = {
     {
       title: 'Fixed',
       type: 'fixed',
-      items: ['Tags not working']
+      items: ['Update interval condition (Fix by: King Cobra)']
     },
     // {
     //   title: "On-going",
