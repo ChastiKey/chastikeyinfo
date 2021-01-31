@@ -38,7 +38,7 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.1.1',
+    version: '2.1.2',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
@@ -470,7 +470,7 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       async fetchRemoteLocksCache(skipElse) {
-        if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'runningLocksCacheTimestamp') || usersCache.length <= 1) {
+        if (Date.now() - 3600000 > BdApi.getData(this.getName(), 'runningLocksCacheTimestamp') || runningLocksCache.length <= 1) {
           BdApi.showToast('Reloading ChastiKey Running Locks Cache', { type: 'info' })
 
           // Make Request

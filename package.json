@@ -1,6 +1,6 @@
 {
   "name": "chastikey-info-bd",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "BetterDiscord Plugin for displaying public ChastiKey Stats in chat.",
   "main": "ChastiKeyInfo.plugin.js",
   "author": "Emma <RileyIO>",
