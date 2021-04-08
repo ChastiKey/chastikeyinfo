@@ -27,7 +27,7 @@
 
 @else@*/
 
-const config = {  
+const config = {
   main: 'index.js',
   info: {
     name: 'ChastiKeyInfo',
@@ -38,7 +38,7 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.1.2',
+    version: '2.1.3',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
@@ -47,8 +47,8 @@ const config = {
     {
       title: 'Fixed',
       type: 'fixed',
-      items: ['Update interval condition (Fix by: King Cobra)']
-    },
+      items: ['Tags not showing up after recent BD and Discord updates']
+    }
     // {
     //   title: "On-going",
     //   type: "progress",
@@ -98,8 +98,8 @@ const config = {
           note: `This needs to be enabled to see any CK Verified tag - Additional Modifications can be found in that category.`,
           value: true,
           options: [
-            { label: "Yes", value: true },
-            { label: "No", value: false }
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
           ]
         },
         {
@@ -109,8 +109,8 @@ const config = {
           note: `This needs to be enabled to see any Locked Months tag - Additional Modifications can be found in that category.`,
           value: true,
           options: [
-            { label: "Yes", value: true },
-            { label: "No", value: false }
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
           ]
         },
         {
@@ -120,8 +120,8 @@ const config = {
           note: 'This needs to be enabled to see any Keyholder tags of Lockees - Additional Modifications can be found in that category.',
           value: true,
           options: [
-            { label: "Yes", value: true },
-            { label: "No", value: false }
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
           ]
         },
         {
@@ -131,8 +131,8 @@ const config = {
           note: `This needs to be enabled to see a Lockee's average rating - Additional Modifications can be found in that category.`,
           value: false,
           options: [
-            { label: "Yes", value: true },
-            { label: "No", value: false }
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
           ]
         },
         {
@@ -142,8 +142,8 @@ const config = {
           note: 'This needs to be enabled to see the percentage of Lockee trust on active locks - Additional Modifications can be found in that category.',
           value: false,
           options: [
-            { label: "Yes", value: true },
-            { label: "No", value: false }
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
           ]
         }
       ]
@@ -269,6 +269,7 @@ const buildPlugin = ([Plugin, Api]) => {
     var usersCache = []
     var runningLocksCache = []
     var cacheUpdater
+    var messagePropMesmIndex = 0
 
     return class ChastiKeyInfo extends Plugin {
       constructor() {
@@ -283,10 +284,7 @@ const buildPlugin = ([Plugin, Api]) => {
         Logger.log('Started')
         // Force Update Check
         Logger.log('Checking for ChastiKeyInfo BD update! Current:', this.getVersion())
-        PluginUpdater.checkForUpdate(
-          this.getName(),
-          this.getVersion(),
-          'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js');
+        PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js')
 
         this.settings = this.loadSettings(this.default)
         this.reinjectCSS()
@@ -372,6 +370,19 @@ const buildPlugin = ([Plugin, Api]) => {
       getLocks(id) {
         return runningLocksCache.filter((lock) => lock.discordID === id)
       }
+
+      // ! WIP
+      // findMesmID(instance) {
+      //   const arr = Utilities.getNestedProp(instance, 'memoizedProps.children')
+      //   Logger.log('findMesmID arr:', arr)
+      //   if (!arr) return null
+      //   if (arr)
+      //     for (let index = 1; index < arr.length + 1; index++) {
+      //       const prop = arr[index]
+      //       if (!prop) continue
+      //       const toTest = Utilities.getNestedProp(prop, `memoizedProps.children.${index}`)
+      //     }
+      // }
 
       reduceUser(user) {
         return {
@@ -559,9 +570,14 @@ const buildPlugin = ([Plugin, Api]) => {
           return
         }
 
-        const instance = ReactTools.getReactInstance(node);
+        const instance = ReactTools.getReactInstance(node)
         if (!instance) return
-        const { message: { author } } = Utilities.getNestedProp(instance, 'memoizedProps.children.1.props.children.1.props')
+        // Logger.log('utils nested:', instance)
+        // Logger.log('utils:', Utilities.getNestedProp(instance, 'memoizedProps.children.2.props.children.1.props'))
+        // this.findMesmID(instance)
+        const {
+          message: { author }
+        } = Utilities.getNestedProp(instance, 'memoizedProps.children.2.props.children.1.props')
 
         // Prepare items to append
         var toAppend = []
@@ -660,39 +676,39 @@ const buildPlugin = ([Plugin, Api]) => {
 module.exports = (() => {
   return !global.ZeresPluginLibrary
     ? class {
-      constructor() {
-        this._config = config
+        constructor() {
+          this._config = config
+        }
+        getName() {
+          return config.info.name
+        }
+        getAuthor() {
+          return config.info.authors.map((a) => a.name).join(', ')
+        }
+        getDescription() {
+          return config.info.description
+        }
+        getVersion() {
+          return config.info.version
+        }
+        load() {
+          BdApi.showConfirmationModal('Library Missing', `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
+            confirmText: 'Download Now',
+            cancelText: 'Cancel',
+            onConfirm: () => {
+              require('request').get('https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js', async (error, response, body) => {
+                if (error)
+                  return require('electron').shell.openExternal(
+                    'https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js'
+                  )
+                await new Promise((r) => require('fs').writeFile(require('path').join(BdApi.Plugins.folder, '0PluginLibrary.plugin.js'), body, r))
+              })
+            }
+          })
+        }
+        start() {}
+        stop() {}
       }
-      getName() {
-        return config.info.name
-      }
-      getAuthor() {
-        return config.info.authors.map((a) => a.name).join(', ')
-      }
-      getDescription() {
-        return config.info.description
-      }
-      getVersion() {
-        return config.info.version
-      }
-      load() {
-        BdApi.showConfirmationModal('Library Missing', `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
-          confirmText: 'Download Now',
-          cancelText: 'Cancel',
-          onConfirm: () => {
-            require('request').get('https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js', async (error, response, body) => {
-              if (error)
-                return require('electron').shell.openExternal(
-                  'https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js'
-                )
-              await new Promise((r) => require('fs').writeFile(require('path').join(BdApi.Plugins.folder, '0PluginLibrary.plugin.js'), body, r))
-            })
-          }
-        })
-      }
-      start() { }
-      stop() { }
-    }
     : buildPlugin(global.ZeresPluginLibrary.buildPlugin(config))
 })()
 /*@end@*/
