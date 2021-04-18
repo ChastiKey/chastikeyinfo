@@ -329,9 +329,9 @@ const css = `
   color: #fff;
 }
 
-.cktag.keyholder-level-1 { background-color: #904fad; }
-.cktag.keyholder-level-2 { background-color: #a069ba; }
-.cktag.keyholder-level-3 { background-color: #b184c7; color: #333; }
+.cktag.keyholder-level-1 { background-color: #904fad; color: #fff;}
+.cktag.keyholder-level-2 { background-color: #a069ba; color: #fff;}
+.cktag.keyholder-level-3 { background-color: #b184c7; color: #333;}
 .cktag.keyholder-level-4 { background-color: #c19ed4; color: #333;}
 .cktag.keyholder-level-5 { background-color: #d1b8e1; color: #333;}
 `
