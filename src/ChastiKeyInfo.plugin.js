@@ -38,16 +38,16 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.1.3',
+    version: '2.2.0',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
-      title: 'Fixed',
-      type: 'fixed',
-      items: ['Tags not showing up after recent BD and Discord updates']
+      title: 'New',
+      type: 'new',
+      items: ['New Tags Customizations Added']
     }
     // {
     //   title: "On-going",
