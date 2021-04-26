@@ -1,5 +1,14 @@
+2.2.1
+- Added: Missing Changelog 
+- Fixed: Formatting Error in KeyholderCurrentLocks
+
 2.2.0
-- Added: New Tags Customizations Added
+- New: KeyholderCurrentLocks & TotalLocksManaged
+- New: Lockee Current Active Lock Duration
+- New: Longest Lock Running or Finished of a Lockee
+- New: Keyholder Rating
+- Updated: Lockee Rating
+- Added: Configuration options for all new Features
 
 2.1.3
 - Fixed: Tags not working after Discord update.
