@@ -3,11 +3,11 @@
 - Fixed: Formatting Error in KeyholderCurrentLocks
 
 2.2.0
-- New: KeyholderCurrentLocks & TotalLocksManaged
-- New: Lockee Current Active Lock Duration
-- New: Longest Lock Running or Finished of a Lockee
-- New: Keyholder Rating
-- Updated: Lockee Rating
+- New: KeyholderCurrentLocks & TotalLocksManaged Tag
+- New: Lockee Current Active Lock Duration Tag
+- New: Longest Lock Running or Finished of a Lockee Tag
+- New: Keyholder Rating Tag
+- Updated: Lockee Rating Tag
 - Added: Configuration options for all new Features
 
 2.1.3
