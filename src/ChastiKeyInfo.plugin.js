@@ -38,16 +38,37 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.2.0',
+    version: '2.2.1',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
+      title: 'Added',
+      type: 'Added',
+      items: [
+	      "Missing Changelog for Update 2.2.0",
+	      "Configuration options for all new Features"
+      ]
+    },
+    {
       title: 'New',
-      type: 'new',
-      items: ['New Tags Customizations Added']
+      type: 'New',
+      items: [
+	      "KeyholderCurrentLocks & TotalLocksManaged Tag",
+	      "Lockee Current Active Lock Duration Tag",
+	      "Longest Lock Running or Finished of a Lockee Tag",
+	      "Keyholder Rating Tag"
+      ]
+    },
+    {
+      title: 'Updated',
+      type: 'Updated',
+      items: [
+	      "Lockee Rating Tag",
+	      "Formatting Error in KeyholderCurrentLocks"
+	     ]
     }
     // {
     //   title: "On-going",
