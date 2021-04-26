@@ -38,16 +38,16 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.1.3',
+    version: '2.2.0',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
-      title: 'Fixed',
-      type: 'fixed',
-      items: ['Tags not showing up after recent BD and Discord updates']
+      title: 'New',
+      type: 'new',
+      items: ['New Tags Customizations Added']
     }
     // {
     //   title: "On-going",
@@ -102,7 +102,7 @@ const config = {
             { label: 'No', value: false }
           ]
         },
-		{
+        {
           type: 'dropdown',
           id: 'keyholderCurrentLocks',
           name: 'Keyholder Lock Count',
@@ -124,7 +124,7 @@ const config = {
             { label: 'No', value: false }
           ]
         },
-		{
+        {
           type: 'dropdown',
           id: 'currentLock',
           name: 'Current Lock',
@@ -135,7 +135,7 @@ const config = {
             { label: 'No', value: false }
           ]
         },
-		{
+        {
           type: 'dropdown',
           id: 'longestLockedTime',
           name: 'Longest Locked Time',
@@ -157,7 +157,7 @@ const config = {
             { label: 'No', value: false }
           ]
         },
-		{
+        {
           type: 'dropdown',
           id: 'keyholderRating',
           name: 'Keyholder Average Rating',
@@ -220,7 +220,7 @@ const config = {
             { label: 'Decimal Months Only', value: 'decimal' }
           ]
         },
-		{
+        {
           type: 'dropdown',
           id: 'currentLockedTimeMods',
           name: 'Current Locked Time Tag Modifications',
@@ -230,7 +230,7 @@ const config = {
             { label: 'Decimal Months Only', value: 'decimal' }
           ]
         },
-		{
+        {
           type: 'dropdown',
           id: 'longestLockedTimeMods',
           name: 'Total Locked Time Tag Modifications',
@@ -240,7 +240,7 @@ const config = {
             { label: 'Decimal Months Only', value: 'decimal' }
           ]
         },
-		{
+        {
           type: 'dropdown',
           id: 'RatingMods',
           name: 'Total Rating Tag Modifications',
@@ -427,7 +427,7 @@ const buildPlugin = ([Plugin, Api]) => {
                 'content-type': 'application/json',
                 accept: 'application/json',
                 clientID: this.settings.api.clientID,
-                clientSecret: this.settings.api.clientSecret,
+                clientSecret: this.settings.api.clientSecret
               }
             },
             (error, response, result) => {
@@ -465,48 +465,48 @@ const buildPlugin = ([Plugin, Api]) => {
 
       reduceUser(user) {
         return {
-		// userID: user.id,
-        username: user.username,
-        discordID: user.discordID,
-        averageKeyholderRating: user.averageKeyholderRating,
-        averageLockeeRating: user.averageLockeeRating,
-		// averageTimeLockedInSeconds: user.averageTimeLockedInSeconds,
-		// buildNumberInstalled: user.buildNumberInstalled,
-		// cumulativeSecondsLocked: user.cumulativeSecondsLocked,
-		// dateFirstKeyheld: user.dateFirstKeyheld,
-		// displayInStats: user.displayInStats,
-		// followersCount: user.followersCount,
-		// followingCount: user.followingCount,
-		// joined: user.joined,
-        keyholderLevel: user.keyholderLevel,
-        lockeeLevel: user.lockeeLevel,
-		longestCompletedLockInSeconds: user.longestCompletedLockInSeconds,
-        mainRole: user.mainRole,
-		// noOfLocksFlaggedAsTrusted: user.noOfLocksFlaggedAsTrusted,
-		noOfKeyholderRatings: user.noOfKeyholderRatings,
-        noOfLockeeRatings: user.noOfLockeeRatings,
-		noOfLocksManagingNow: user.noOfLocksManagingNow,
-		// noOfLocksManagingNowFixed: user.noOfLocksManagingNowFixed,
-		// noOfLocksManagingNowVariable: user.noOfLocksManagingNowVariable,
-		// noOfSharedLocks: user.noOfSharedLocks,
-		// noOfSharedLocksFixed: user.noOfSharedLocksFixed,
-		// noOfSharedLocksVariable: user.noOfSharedLocksVariable,
-		secondsLockedInCurrentLock: user.secondsLockedInCurrentLock,
-		// status: user.status,
-		// timestampFirstKeyheld: user.timestampFirstKeyheld,
-		// timestampJoined: user.timestampJoined,
-		// timestampLastActive: user.timestampLastActive,
-        totalLocksManaged: user.totalLocksManaged,
-        totalNoOfCompletedLocks: user.totalNoOfCompletedLocks,
-		// totalNoOfLocks: user.totalNoOfLocks,
-		// twitterUsername: user.twitterUsername,
-		versionInstalled: user.versionInstalled,
-		
-		//Math
-        _totalTimeLocked: Math.round((user.cumulativeSecondsLocked / 2592000) * 100) / 100,
-		_longestCompletedLock: Math.round((user.longestCompletedLockInSeconds / 86400) * 100) / 100,
-		_daysLockedInCurrentLock: Math.round((user.secondsLockedInCurrentLock / 86400) * 100) / 100,
-		_monthsLockedInCurrentLock: Math.round((user.secondsLockedInCurrentLock / 2592000) * 100) / 100
+          // userID: user.id,
+          username: user.username,
+          discordID: user.discordID,
+          averageKeyholderRating: user.averageKeyholderRating,
+          averageLockeeRating: user.averageLockeeRating,
+          // averageTimeLockedInSeconds: user.averageTimeLockedInSeconds,
+          // buildNumberInstalled: user.buildNumberInstalled,
+          // cumulativeSecondsLocked: user.cumulativeSecondsLocked,
+          // dateFirstKeyheld: user.dateFirstKeyheld,
+          // displayInStats: user.displayInStats,
+          // followersCount: user.followersCount,
+          // followingCount: user.followingCount,
+          // joined: user.joined,
+          keyholderLevel: user.keyholderLevel,
+          lockeeLevel: user.lockeeLevel,
+          longestCompletedLockInSeconds: user.longestCompletedLockInSeconds,
+          mainRole: user.mainRole,
+          // noOfLocksFlaggedAsTrusted: user.noOfLocksFlaggedAsTrusted,
+          noOfKeyholderRatings: user.noOfKeyholderRatings,
+          noOfLockeeRatings: user.noOfLockeeRatings,
+          noOfLocksManagingNow: user.noOfLocksManagingNow,
+          // noOfLocksManagingNowFixed: user.noOfLocksManagingNowFixed,
+          // noOfLocksManagingNowVariable: user.noOfLocksManagingNowVariable,
+          // noOfSharedLocks: user.noOfSharedLocks,
+          // noOfSharedLocksFixed: user.noOfSharedLocksFixed,
+          // noOfSharedLocksVariable: user.noOfSharedLocksVariable,
+          secondsLockedInCurrentLock: user.secondsLockedInCurrentLock,
+          // status: user.status,
+          // timestampFirstKeyheld: user.timestampFirstKeyheld,
+          // timestampJoined: user.timestampJoined,
+          // timestampLastActive: user.timestampLastActive,
+          totalLocksManaged: user.totalLocksManaged,
+          totalNoOfCompletedLocks: user.totalNoOfCompletedLocks,
+          // totalNoOfLocks: user.totalNoOfLocks,
+          // twitterUsername: user.twitterUsername,
+          versionInstalled: user.versionInstalled,
+
+          //Math
+          _totalTimeLocked: Math.round((user.cumulativeSecondsLocked / 2592000) * 100) / 100,
+          _longestCompletedLock: Math.round((user.longestCompletedLockInSeconds / 86400) * 100) / 100,
+          _daysLockedInCurrentLock: Math.round((user.secondsLockedInCurrentLock / 86400) * 100) / 100,
+          _monthsLockedInCurrentLock: Math.round((user.secondsLockedInCurrentLock / 2592000) * 100) / 100
         }
       }
 
@@ -707,16 +707,16 @@ const buildPlugin = ([Plugin, Api]) => {
 
         // When verified
         if (this.settings.tags.verifiedTag) toAppend.push(this.verifiedTag())
-		// Keyholder Current Active Lock Count
+        // Keyholder Current Active Lock Count
         if (this.settings.tags.keyholderCurrentLocks && user.totalLocksManaged > 0) toAppend.push(this.KeyholderCurrentActiveLocks(user))
         // Cumulative Time Locked
         if (this.settings.tags.lockedTime) toAppend.push(this.lockedTime(user))
-		// Current Lock
-		if (this.settings.tags.currentLock) toAppend.push(this.currentLockedTime(user))
-		// Longest Completed Locked
-		if (this.settings.tags.longestLockedTime && (user.secondsLockedInCurrentLock > 0 || user.longestCompletedLockInSeconds > 0)) toAppend.push(this.longestCompletedLock(user))
-		//Keyholder Rating
-		if (this.settings.tags.keyholderRating && user.noOfKeyholderRatings >= 5) toAppend.push(this.averageRatingKeyholder(user))
+        // Current Lock
+        if (this.settings.tags.currentLock) toAppend.push(this.currentLockedTime(user))
+        // Longest Completed Locked
+        if (this.settings.tags.longestLockedTime && (user.secondsLockedInCurrentLock > 0 || user.longestCompletedLockInSeconds > 0)) toAppend.push(this.longestCompletedLock(user))
+        //Keyholder Rating
+        if (this.settings.tags.keyholderRating && user.noOfKeyholderRatings >= 5) toAppend.push(this.averageRatingKeyholder(user))
         // Lockee Ratings
         if (this.settings.tags.lockeeRating && user.noOfLockeeRatings >= 5) toAppend.push(this.averageRatingLockee(user))
         // When there's an active lock
@@ -735,46 +735,54 @@ const buildPlugin = ([Plugin, Api]) => {
         tag.classList.add('before')
         return tag
       }
-	  
-	  KeyholderCurrentActiveLocks(user) {
+
+      KeyholderCurrentActiveLocks(user) {
         // When there's no data, just return a tag with 0 in it
-		const tag = this.createTag(this.settings.mods.lockedTimeMods === 'decimal' ? `${user.noOfLocksManagingNow} | ${user.totalLocksManaged}` : `🔑${user.noOfLocksManagingNow} | ${user.totalLocksManaged}`, `keyholder-level-${user.keyholderLevel}`)
+        const tag = this.createTag(
+          this.settings.mods.lockedTimeMods === 'decimal'
+            ? `${user.noOfLocksManagingNow} | ${user.totalLocksManaged}`
+            : `🔑${user.noOfLocksManagingNow} | ${user.totalLocksManaged}`,
+          `keyholder-level-${user.keyholderLevel}`
+        )
         tag.classList.add('before')
         return tag
       }
-	  
+
       lockedTime(user) {
         // When there's no data, just return a tag with 0 in it
         const tag = this.createTag(this.settings.mods.lockedTimeMods === 'decimal' ? `${user._totalTimeLocked} mo.` : `🔒 ${user._totalTimeLocked} mo.`, 'totalTimeLocked')
         tag.classList.add('before')
         return tag
       }
-	  
-	  currentLockedTime(user) {
-		var tag 
-		if(user.secondsLockedInCurrentLock > 0)
-		{
-			tag = this.createTag(this.settings.mods.currentLockedTimeMods === 'decimal' ? `${user._monthsLockedInCurrentLock} mo.` : `⌛ ${user._monthsLockedInCurrentLock} mo.`, 'currentTimeLocked')
-		}
-		else
-		{
-			tag = this.createTag(this.settings.mods.currentLockedTimeMods === 'decimal' ? ` - ` : `⌛ - `, 'currentTimeLocked')
-		}
+
+      currentLockedTime(user) {
+        var tag
+        if (user.secondsLockedInCurrentLock > 0) {
+          tag = this.createTag(
+            this.settings.mods.currentLockedTimeMods === 'decimal' ? `${user._monthsLockedInCurrentLock} mo.` : `⌛ ${user._monthsLockedInCurrentLock} mo.`,
+            'currentTimeLocked'
+          )
+        } else {
+          tag = this.createTag(this.settings.mods.currentLockedTimeMods === 'decimal' ? ` - ` : `⌛ - `, 'currentTimeLocked')
+        }
         tag.classList.add('before')
         return tag
       }
 
-	  longestCompletedLock(user) {
-		  var tag
-		  if(user.secondsLockedInCurrentLock>user.longestCompletedLockInSeconds)
-		  {
-			  tag = this.createTag(this.settings.mods.longestLockedTimeMods === 'decimal' ? `${user._daysLockedInCurrentLock} Days` : `🏆 ${user._daysLockedInCurrentLock} Days`, 'longestTimeLocked')
-		  }	
-		  else
-		  {
-			  tag = this.createTag(this.settings.mods.longestLockedTimeMods === 'decimal' ? `${user._longestCompletedLock} Days` : `🏆 ${user._longestCompletedLock} Days`, 'longestTimeLocked')
-		  }			  
-		
+      longestCompletedLock(user) {
+        var tag
+        if (user.secondsLockedInCurrentLock > user.longestCompletedLockInSeconds) {
+          tag = this.createTag(
+            this.settings.mods.longestLockedTimeMods === 'decimal' ? `${user._daysLockedInCurrentLock} Days` : `🏆 ${user._daysLockedInCurrentLock} Days`,
+            'longestTimeLocked'
+          )
+        } else {
+          tag = this.createTag(
+            this.settings.mods.longestLockedTimeMods === 'decimal' ? `${user._longestCompletedLock} Days` : `🏆 ${user._longestCompletedLock} Days`,
+            'longestTimeLocked'
+          )
+        }
+
         tag.classList.add('before')
         return tag
       }
@@ -805,34 +813,28 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       averageRatingKeyholder(user) {
-		  const rating_keyholder = (Math.round(user.averageKeyholderRating * 100) / 100).toFixed(2)
-		  const inFull_keyholder = rating_keyholder === 5.0 || rating_keyholder === 4.0 || rating_keyholder === 3.0 || rating_keyholder === 2.0 || rating_keyholder === 1.0
-		  var tag
-		  if(this.settings.mods.RatingMods === 'decimal')
-		  {
-			  tag = this.createTag(`${inFull_keyholder ? Math.round(rating_keyholder) : rating_keyholder}`, `keyholder-level-${user.keyholderLevel}`)
-		  }
-		  else
-		  {
-			  tag = this.createTag(`⭐ ${inFull_keyholder ? Math.round(rating_keyholder) : rating_keyholder}`, `keyholder-level-${user.keyholderLevel}`)
-		  }
+        const rating_keyholder = (Math.round(user.averageKeyholderRating * 100) / 100).toFixed(2)
+        const inFull_keyholder = rating_keyholder === 5.0 || rating_keyholder === 4.0 || rating_keyholder === 3.0 || rating_keyholder === 2.0 || rating_keyholder === 1.0
+        var tag
+        if (this.settings.mods.RatingMods === 'decimal') {
+          tag = this.createTag(`${inFull_keyholder ? Math.round(rating_keyholder) : rating_keyholder}`, `keyholder-level-${user.keyholderLevel}`)
+        } else {
+          tag = this.createTag(`⭐ ${inFull_keyholder ? Math.round(rating_keyholder) : rating_keyholder}`, `keyholder-level-${user.keyholderLevel}`)
+        }
         tag.classList.add('before')
         return tag
       }
-	  
-	  averageRatingLockee(user) {
-		  const rating_lockee = (Math.round(user.averageLockeeRating * 100) / 100).toFixed(2)
-		  const inFull_lockee = rating_lockee === 5.0 || rating_lockee === 4.0 || rating_lockee === 3.0 || rating_lockee === 2.0 || rating_lockee === 1.0
-		  var tag
-		  if(this.settings.mods.RatingMods === 'decimal')
-		  {
-			  tag = this.createTag(`${inFull_lockee ? Math.round(rating_lockee) : rating_lockee}`, 'lockeeRating')
-		  }
-		  else
-		  {
-			  tag = this.createTag(`⭐ ${inFull_lockee ? Math.round(rating_lockee) : rating_lockee}`, 'lockeeRating')
-		  }
-        
+
+      averageRatingLockee(user) {
+        const rating_lockee = (Math.round(user.averageLockeeRating * 100) / 100).toFixed(2)
+        const inFull_lockee = rating_lockee === 5.0 || rating_lockee === 4.0 || rating_lockee === 3.0 || rating_lockee === 2.0 || rating_lockee === 1.0
+        var tag
+        if (this.settings.mods.RatingMods === 'decimal') {
+          tag = this.createTag(`${inFull_lockee ? Math.round(rating_lockee) : rating_lockee}`, 'lockeeRating')
+        } else {
+          tag = this.createTag(`⭐ ${inFull_lockee ? Math.round(rating_lockee) : rating_lockee}`, 'lockeeRating')
+        }
+
         tag.classList.add('before')
         return tag
       }
