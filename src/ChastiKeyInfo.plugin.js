@@ -489,17 +489,12 @@ const buildPlugin = ([Plugin, Api]) => {
       reinjectCSS() {
         Logger.log('reinjectCSS')
         PluginUtilities.removeStyle(this.short);
-        
         css = css.replace(/{username}/, this.settings.tagcolor.username);
         css = css.replace(/{verified_color}/, this.settings.tagcolor.verified);
         css = css.replace(/{total_time_locked}/, this.settings.tagcolor.totalTimeLocked);
         css = css.replace(/{current_time_locked}/, this.settings.tagcolor.currentTimeLocked);
         css = css.replace(/{longest_time_locked}/, this.settings.tagcolor.longestTimeLocked);
         PluginUtilities.addStyle('cktag', css);
-
-        ContextMenu.MenuItem
-        
-        //PluginUtilities.addStyle('cktag')
       }
 
       request(method, url) {
