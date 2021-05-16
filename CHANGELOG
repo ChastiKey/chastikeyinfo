@@ -1,5 +1,18 @@
+2.3.0
+- Added: Options to change the color of most of the Tags
+- New. ChastiKey Username Tag
+
+2.2.1
+- Added: Missing Changelog 
+- Fixed: Formatting Error in KeyholderCurrentLocks
+
 2.2.0
-- Added: New Tags Customizations Added
+- New: KeyholderCurrentLocks & TotalLocksManaged Tag
+- New: Lockee Current Active Lock Duration Tag
+- New: Longest Lock Running or Finished of a Lockee Tag
+- New: Keyholder Rating Tag
+- Updated: Lockee Rating Tag
+- Added: Configuration options for all new Features
 
 2.1.3
 - Fixed: Tags not working after Discord update.

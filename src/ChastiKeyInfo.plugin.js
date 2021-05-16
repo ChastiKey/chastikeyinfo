@@ -38,16 +38,25 @@ const config = {
         github_username: 'rileyio'
       }
     ],
-    version: '2.2.0',
+    version: '2.3.0',
     description: 'Display ChastiKey public stats & locks data inline next to message authors.',
     github: 'https://github.com/rileyio/chastikeyinfo',
     github_raw: 'https://raw.githubusercontent.com/rileyio/chastikeyinfo/master/src/ChastiKeyInfo.plugin.js'
   },
   changelog: [
     {
+      title: 'Added',
+      type: 'Added',
+      items: [
+	      "Options to change the color of most of the Tag"
+      ]
+    },
+    {
       title: 'New',
-      type: 'new',
-      items: ['New Tags Customizations Added']
+      type: 'New',
+      items: [
+	      "Chastikey Username Tag",
+      ]
     }
     // {
     //   title: "On-going",
@@ -96,6 +105,17 @@ const config = {
           id: 'verifiedTag',
           name: 'CK Verified',
           note: `This needs to be enabled to see any CK Verified tag - Additional Modifications can be found in that category.`,
+          value: true,
+          options: [
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
+          ]
+        },
+        {
+          type: 'dropdown',
+          id: 'ChastiKeyUsername',
+          name: 'ChastiKey Username',
+          note: `This needs to be enabled to see any ChastiKey Username - Additional Modifications can be found in that category.`,
           value: true,
           options: [
             { label: 'Yes', value: true },
@@ -271,11 +291,60 @@ const config = {
           ]
         }
       ]
+    },
+    {
+      type: 'category',
+      id: 'tagcolor',
+      name: 'Tag Colors (Requires restart!)',
+      collapsible: true,
+      shown: false,
+      settings: [
+        {
+          type: 'color',
+          id: 'verified',
+          name: 'Ck Verfied Tag Color',
+          note: "Choose the color for the CK Verifed Tag",
+          value: '#27ae60',
+          placeholder: '#27ae60',
+        },
+        {
+          type: 'color',
+          id: 'username',
+          name: 'Ck Username Tag Color',
+          note: "Choose the color for the CK Username Tag",
+          value: '#fe9a2e',
+          placeholder: '#fe9a2e',
+        },
+        {
+          type: 'color',
+          id: 'totalTimeLocked',
+          name: 'Total Time Locked Tag Color',
+          note: "Choose the color for the Total Time Locked Tag",
+          value: '#239cb7',
+          placeholder: '#239cb7',
+        },
+        {
+          type: 'color',
+          id: 'currentTimeLocked',
+          name: 'Current Time Locked Tag Color',
+          note: "Choose the color for the Current Time Locked Tag",
+          value: '#298A08',
+          placeholder: '#298A08',
+        },
+        {
+          type: 'color',
+          id: 'longestTimeLocked',
+          name: 'Longest Time Locked Tag Color',
+          note: "Choose the color for the Longest Time Locked Tag",
+          value: '#f78181',
+          placeholder: '#f78181',
+        }
+      ]
     }
   ]
 }
 
-const css = `
+var css = `
 .cktag {
   position: relative;
   font-size: 12px;
@@ -288,15 +357,21 @@ const css = `
 }
 
 .cktag.verified {
-  background-color: #27ae60;
+  background-color: {verified_color};
   color: #fff;
   margin-left: 4px;
 }
+
 .cktag.verifiedCircle {
-  background-color: #27ae60;
+  background-color: {verified_color};
   color: #fff;
   border-radius: 50%;
   margin-left: 4px;
+}
+
+.cktag.username {
+  background-color: {username};
+  color: #fff;
 }
 
 .cktag.keyholder {
@@ -305,17 +380,17 @@ const css = `
 }
 
 .cktag.totalTimeLocked {
-  background-color: #239cb7;
+  background-color: {total_time_locked};
   color: #fff;
 }
 
 .cktag.currentTimeLocked {
-  background-color: #239cb7;
+  background-color: {current_time_locked};
   color: #fff;
 }
 
 .cktag.longestTimeLocked {
-  background-color: #239cb7;
+  background-color: {longest_time_locked};
   color: #fff;
 }
 
@@ -337,12 +412,13 @@ const css = `
 `
 
 const buildPlugin = ([Plugin, Api]) => {
-  const { DOMTools, Logger, PluginUpdater, PluginUtilities, ReactTools, Utilities, WebpackModules } = Api
+  const { DOMTools, Logger, PluginUpdater, PluginUtilities, ReactTools, Utilities, WebpackModules} = Api
   const req = require('request')
   const MessageClasses = {
     ...WebpackModules.getByProps('message', 'groupStart'),
     ...WebpackModules.getByProps('compact', 'cozy', 'username')
   }
+
 
   const plugin = () => {
     var usersCache = []
@@ -412,8 +488,13 @@ const buildPlugin = ([Plugin, Api]) => {
 
       reinjectCSS() {
         Logger.log('reinjectCSS')
-        PluginUtilities.removeStyle('cktag')
-        PluginUtilities.addStyle('cktag')
+        PluginUtilities.removeStyle(this.short);
+        css = css.replace(/{username}/, this.settings.tagcolor.username);
+        css = css.replace(/{verified_color}/, this.settings.tagcolor.verified);
+        css = css.replace(/{total_time_locked}/, this.settings.tagcolor.totalTimeLocked);
+        css = css.replace(/{current_time_locked}/, this.settings.tagcolor.currentTimeLocked);
+        css = css.replace(/{longest_time_locked}/, this.settings.tagcolor.longestTimeLocked);
+        PluginUtilities.addStyle('cktag', css);
       }
 
       request(method, url) {
@@ -449,19 +530,6 @@ const buildPlugin = ([Plugin, Api]) => {
       getLocks(id) {
         return runningLocksCache.filter((lock) => lock.discordID === id)
       }
-
-      // ! WIP
-      // findMesmID(instance) {
-      //   const arr = Utilities.getNestedProp(instance, 'memoizedProps.children')
-      //   Logger.log('findMesmID arr:', arr)
-      //   if (!arr) return null
-      //   if (arr)
-      //     for (let index = 1; index < arr.length + 1; index++) {
-      //       const prop = arr[index]
-      //       if (!prop) continue
-      //       const toTest = Utilities.getNestedProp(prop, `memoizedProps.children.${index}`)
-      //     }
-      // }
 
       reduceUser(user) {
         return {
@@ -656,7 +724,9 @@ const buildPlugin = ([Plugin, Api]) => {
       }
 
       getSettingsPanel() {
+
         return this.buildSettingsPanel().getElement()
+
       }
 
       observer({ addedNodes }) {
@@ -707,6 +777,8 @@ const buildPlugin = ([Plugin, Api]) => {
 
         // When verified
         if (this.settings.tags.verifiedTag) toAppend.push(this.verifiedTag())
+        // Add Chastikey Username
+        if (this.settings.tags.ChastiKeyUsername) toAppend.push(this.username(user))
         // Keyholder Current Active Lock Count
         if (this.settings.tags.keyholderCurrentLocks && user.totalLocksManaged > 0) toAppend.push(this.KeyholderCurrentActiveLocks(user))
         // Cumulative Time Locked
@@ -732,6 +804,12 @@ const buildPlugin = ([Plugin, Api]) => {
       verifiedTag() {
         const isCircle = this.settings.mods.verifiedTagMods === 'checkmarkCircle'
         const tag = this.createTag(this.settings.mods.verifiedTagMods !== 'full' ? '✓' : '✓ CK Verified', isCircle ? 'verifiedCircle' : 'verified')
+        tag.classList.add('before')
+        return tag
+      }
+
+      username(user) {
+        const tag = this.createTag(`${user.username}`, 'username')
         tag.classList.add('before')
         return tag
       }
